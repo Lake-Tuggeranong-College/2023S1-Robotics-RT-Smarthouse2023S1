@@ -6,6 +6,10 @@
 
 ```mermaid
 flowchart TD
-    A-->B
+    Start([horn])
+    getButtonStatus(Get Button Status)
+    checkButton{has button been pressed}
+    soundHorn(Play Sound)
+    finish([End])
 
 ```
