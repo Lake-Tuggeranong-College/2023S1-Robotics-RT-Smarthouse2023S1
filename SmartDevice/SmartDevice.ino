@@ -28,4 +28,16 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  turnServo()
+
+  delay(250);
+}
+
+/* 
+Using the line reader, determing if the servo should be on or off
+@params none
+@return none
+*/
+void turnServo () {
+  
 }
