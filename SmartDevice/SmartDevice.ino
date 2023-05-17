@@ -27,17 +27,67 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  turnServo()
-
-  delay(250);
+  bluetoothConnectivity();
+  motorDC();
+  doorAlarm();
 }
 
-/* 
-Using the line reader, determing if the servo should be on or off
-@params none
-@return none
+/*
+  Reads distance value from Sonar (HC-SR04). 
+  If less than threshold, activate Piezo buzzer
+  @param None
+  @return void
 */
-void turnServo () {
-  
+void doorAlarm() {
+
+}
+
+/*
+  Test Code for DC Motor Usage
+  @param None
+  @return void
+*/
+void motorDC() {
+
+}
+
+/*
+  Print some information on the motor state in Serial Monitor
+  @param None
+  @return void
+*/
+void printSomeInfo()
+{
+
+}
+
+/*
+    Takes command entered from Bluetooth connection and executes functionality
+    E.g. "1" - Write HIGH to builtin LED
+    "0" - Write LOW to builtin LED
+    @param bleCommand - string accepted from BLE Uart Connection
+    @return void
+*/
+void bluetoothCommandReceived(String bleCommand) {
+
+}
+
+/*
+    Handles BLE connectivity.
+    Taken from library functionality.
+    @param None
+    @return void
+*/
+void bluetoothConnectivity() {
+
+}
+
+/*
+    Log entries to a file on an SD card, and outputs to Serial Monitor
+    @param dataToLog - string to save on SD card, timestamped.
+    @return void
+*/
+void logEvent(String dataToLog) {
+
+
 }
