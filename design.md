@@ -5,7 +5,7 @@
 
 Smart Home Automation System:
 
-This smart home automation system can monitor and control various aspects of a home environment. It incorporates multiple inputs and outputs for enhanced functionality and user experience.
+This smart home automation system can monitor and control various aspects of a home environment. These aspects include a well thought out security system, lighting control and logging of events to troublelshoot problems. It incorporates multiple inputs and outputs for enhanced functionality and user experience.
 
 ## Behaviours
 
