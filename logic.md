@@ -1,28 +1,83 @@
 # Programming Logic
 
-> For each behaviour, create the mermaid flowchart. Start each flowchart with a Heading naming the functionality. Delete this comment prior to submission.
-
-## Logic 1
+## Customizable lighting
 
 ```mermaid
-flowchart TD
-    terminalStart([Start])
-    %% Comment
-    terminalEnd([End])
-    thresholdSet(distanceThreshold = 30)
-    setPiezoPin(piezoPin = 2)
-    currentDistanceReading(distanceRead = response from Sonar)
-    activatePiezo(write HIGH to piezoPin)
-    deactivatePiezo(write LOW to piezoPin)
+flowchart TB
+    subgraph Arduino Code
+        A[Setup]
+        B[Loop]
+        C[Read Potentiometer]
+        D[Map Potentiometer Value]
+        E[Set LED Brightness]
+        F[Delay]
+        A --> B
+        B --> C
+        C --> D
+        D --> E
+        E --> F
+        F --> B
+    end
 
-    ifDistanceLessThanThreshold{distanceRead < distanceThreshold}
+    subgraph Hardware
+        G[Potentiometer]
+        H[LED]
+        G --> C
+        H --> E
+    end
+```
 
-    terminalStart --> thresholdSet
-    thresholdSet --> setPiezoPin
-    setPiezoPin --> currentDistanceReading
-    currentDistanceReading --> ifDistanceLessThanThreshold
-    ifDistanceLessThanThreshold --> |True| activatePiezo
-    ifDistanceLessThanThreshold --> |False| deactivatePiezo
-    deactivatePiezo --> terminalEnd
-    activatePiezo --> terminalEnd
+## Security system
+
+```mermaid
+flowchart TB
+    subgraph Arduino Code
+        A[Setup]
+        B[Loop]
+        C[Read Crash Sensor]
+        D[Read Line Sensor]
+        E[Read PIR Sensor]
+        F[Check Crash Sensor]
+        G[Check Line Sensor]
+        H[Check PIR Sensor]
+        I[House Lockdown]
+        J[Activate LEDs and Buzzers]
+        K[Deactivate LEDs and Buzzers]
+        L[Reset Security System]
+        A --> B
+        B --> C
+        B --> D
+        B --> E
+        C --> F
+        D --> G
+        E --> H
+        F --> I
+        G --> J
+        H --> J
+        J --> K
+        K --> L
+        L --> B
+    end
+
+    subgraph Hardware
+        M[Crash Sensor]
+        N[Line Sensor]
+        O[PIR Sensor]
+        P[Motor]
+        Q[LEDs]
+        R[Buzzers]
+        M --> C
+        N --> D
+        O --> E
+        F --> M
+        G --> N
+        H --> O
+        I --> P
+        J --> Q
+        J --> R
+        K --> Q
+        K --> R
+    end
+
+
 ```

@@ -7,6 +7,8 @@
 RTC_Millis rtc;     // Software Real Time Clock (RTC)
 DateTime rightNow;  // used to store the current time.
 
+
+//PIN ASSIGNMENTS
 // SD Card - Confirm Pin
 #define SD_PIN 10
 
@@ -27,6 +29,8 @@ DateTime rightNow;  // used to store the current time.
 #define LED_YELLOW A1 
 #define LED_GREEN A2
 
+const int DC_MOTOR = 7;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);  // Open serial communications and wait for port to open:
@@ -40,14 +44,13 @@ void setup() {
     Serial.println("initialization failed!");
     while (1);
   }
-  //test
 
   // Real Time Clock (RTC)
   rtc.begin(DateTime(F(__DATE__), F(__TIME__)));
   Serial.println("initialization done.");
   logEvent("System Initialisation...");
 
-
+  // PINMODES
   // Line Sensor
   pinMode(LINE_SENSOR_PIN, INPUT);
 
@@ -64,17 +67,26 @@ void setup() {
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_YELLOW, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
+
+  //DC Motor
+  pinMode(DC_MOTOR, OUTPUT);
 }
 
 void loop() {
 
-  int lineValue = digitalRead(LINE_SENSOR_PIN);
+  /*int lineValue = digitalRead(LINE_SENSOR_PIN);
   Serial.print("Line = ");
   Serial.println(lineValue);
 
   int potValue = analogRead(POTENTIOMETER_PIN);
   Serial.print("Pot = ");
   Serial.println(potValue);
+
+  int brightness = map(POTENTIOMETER_PIN, 0, 1023, 0, 255);  // Map the potentiometer value to LED brightness (0-255)
+
+  analogWrite(ledPin, brightness);  // Set the LED brightness using PWM
+
+  delay(10);  // Delay for stability
 
   bool isCrashDetected = digitalRead(CRASH_SENSOR);
 
@@ -97,4 +109,46 @@ void loop() {
 
 
   delay(250);
+  */
+}
+
+void houseLockdown() {
+  // Lock all doors
+  // Activate security screens over windows
+  digitalWrite(motorPin, HIGH);
+
+  // Update state
+  isHouseLockedDown = true;
+
+  // Optional: Print message
+  Serial.println("House lockdown activated!");
+}
+
+void activateAlertSystem() {
+  // Activate LEDs
+  digitalWrite(ledPin, HIGH);
+
+  // Activate buzzers
+  digitalWrite(buzzerPin, HIGH);
+
+  // Update state
+  isAlertSystemActivated = true;
+
+  // Optional: Print message
+  Serial.println("Alert system activated!");
+}
+
+void resetSecuritySystem() {
+  // Deactivate LEDs
+  digitalWrite(ledPin, LOW);
+
+  // Deactivate buzzers
+  digitalWrite(buzzerPin, LOW);
+
+  // Update state
+  isAlertSystemActivated = false;
+  isHouseLockedDown = false;
+
+  // Optional: Print message
+  Serial.println("Security system reset!");
 }
