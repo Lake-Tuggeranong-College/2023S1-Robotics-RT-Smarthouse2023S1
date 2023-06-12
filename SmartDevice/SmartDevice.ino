@@ -19,7 +19,7 @@ DateTime rightNow;  // used to store the current time.
 #define POTENTIOMETER_PIN A3
 
 // Crash Sensor / Button
-#define CRASH_SENSOR 7
+#define CRASH_SENSOR_PIN 7
 
 // Piezo Buzzer
 #define PIEZO_PIN 8
@@ -29,7 +29,17 @@ DateTime rightNow;  // used to store the current time.
 #define LED_YELLOW A1 
 #define LED_GREEN A2
 
-const int DC_MOTOR = 7;
+const int DC_MOTOR_PIN_1 = 6;        // Replace with your motor pin 1
+const int DC_MOTOR_PIN_2 = 7;        // Replace with your motor pin 2
+const int MOTOR_SPEED = 255; 
+int crashState = 0;
+bool isLocked = false;
+
+
+int potValue = 0;
+int ledValue = 0;
+
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -58,7 +68,7 @@ void setup() {
   pinMode(POTENTIOMETER_PIN, INPUT);
 
   // Crash Sensor / Button
-  pinMode(CRASH_SENSOR, INPUT);
+  pinMode(CRASH_SENSOR_PIN, INPUT);
 
   // Piezo Buzzer
   pinMode(PIEZO_PIN ,OUTPUT);
@@ -69,72 +79,75 @@ void setup() {
   pinMode(LED_GREEN, OUTPUT);
 
   //DC Motor
-  pinMode(DC_MOTOR, OUTPUT);
+  pinMode(DC_MOTOR_PIN_1, OUTPUT);
+  pinMode(DC_MOTOR_PIN_2, OUTPUT);
+
+
+
+
 }
 
 void loop() {
 
-  /*int lineValue = digitalRead(LINE_SENSOR_PIN);
-  Serial.print("Line = ");
-  Serial.println(lineValue);
+  crashState = digitalRead(CRASH_SENSOR_PIN);
 
-  int potValue = analogRead(POTENTIOMETER_PIN);
-  Serial.print("Pot = ");
-  Serial.println(potValue);
-
-  int brightness = map(POTENTIOMETER_PIN, 0, 1023, 0, 255);  // Map the potentiometer value to LED brightness (0-255)
-
-  analogWrite(ledPin, brightness);  // Set the LED brightness using PWM
-
-  delay(10);  // Delay for stability
-
-  bool isCrashDetected = digitalRead(CRASH_SENSOR);
-
-  if (isCrashDetected) {
-    Serial.println("Crash detected: true");
-  } else {
-    Serial.println("Crash detected: false");
-    tone(PIEZO_PIN, 1000, 200);
+  // If crash is detected, toggle the lock state
+  if (crashState == HIGH) {
+    if (!isLocked) {
+      lockHouse();  // Lock the house
+    } else {
+      unlockHouse();  // Unlock the house
+    }
+    delay(200);  // Debounce delay (adjust as needed)
   }
-
-  if (lineValue == 0) {
-    digitalWrite(LED_GREEN, HIGH);
-    digitalWrite(LED_YELLOW, LOW);
-    digitalWrite(LED_RED, LOW);
-  } else{
-    digitalWrite(LED_RED, HIGH);
-    digitalWrite(LED_GREEN, LOW);
-    digitalWrite(LED_YELLOW, LOW);
-  }
-
-
-  delay(250);
-  */
 }
 
-void houseLockdown() {
-  // Lock all doors
-  // Activate security screens over windows
-  digitalWrite(motorPin, HIGH);
 
-  // Update state
-  isHouseLockedDown = true;
+// Function to control lights
+void controlLights() {
+  // Read potentiometer value
+  potValue = analogRead(POTENTIOMETER_PIN);
 
-  // Optional: Print message
-  Serial.println("House lockdown activated!");
+  // Map potentiometer value to LED brightness range
+  greenLedValue = map(potValue, 0, 1023, 0, 255);
+  yellowLedValue = map(potValue, 0, 1023, 0, 180);
+  redLedValue = map(potValue, 0, 1023, 0, 120);
+
+  // Update LED brightness
+  analogWrite(LED_GREEN, greenLedValue);
+  analogWrite(LED_YELLOW, yellowLedValue);
+  analogWrite(LED_RED, redLedValue);
+}
+
+// Function to lock the house
+void lockHouse() {
+  digitalWrite(DC_MOTOR_PIN_1, HIGH);
+  digitalWrite(DC_MOTOR_PIN_2, LOW);
+  delay(2000);  // Motor runs for 2 seconds (adjust as needed)
+  digitalWrite(DC_MOTOR_PIN_1, LOW);
+  isLocked = true;
+}
+
+// Function to unlock the house
+void unlockHouse() {
+  digitalWrite(DC_MOTOR_PIN_1, LOW);
+  digitalWrite(DC_MOTOR_PIN_2, HIGH);
+  delay(2000);  // Motor runs for 2 seconds (adjust as needed)
+  digitalWrite(DC_MOTOR_PIN_2, LOW);
+  isLocked = false;
 }
 
 void activateAlertSystem() {
   // Activate LEDs
-  digitalWrite(ledPin, HIGH);
+  digitalWrite(LED_RED, HIGH);
 
   // Activate buzzers
-  digitalWrite(buzzerPin, HIGH);
+  tone(PIEZO_PIN, 1000, 200);
 
   // Update state
   isAlertSystemActivated = true;
 
-  // Optional: Print message
+  // Print message
   Serial.println("Alert system activated!");
 }
 

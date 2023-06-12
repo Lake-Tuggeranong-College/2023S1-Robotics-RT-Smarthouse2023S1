@@ -79,5 +79,46 @@ flowchart TB
         K --> R
     end
 
+    
+```
 
+## Security system
+
+```mermaid
+graph TD;
+  subgraph Initialization
+    A[Setup] --> B[Set crash sensor pin as input]
+    A --> C[Set motor pins as output]
+  end
+
+  subgraph Main Loop
+    D[Read crash sensor state] --> E[Is crash detected?]
+    E -- No --> D
+    E -- Yes --> F[Is house locked?]
+    F -- No --> G[Lock the house]
+    F -- Yes --> H[Unlock the house]
+  end
+
+  subgraph Lock House
+    G --> I[Activate motor clockwise]
+    I --> J[Delay 2 seconds]
+    J --> K[Stop motor]
+    K --> L[Set house as locked]
+  end
+
+  subgraph Unlock House
+    H --> M[Activate motor counter-clockwise]
+    M --> N[Delay 2 seconds]
+    N --> O[Stop motor]
+    O --> P[Set house as unlocked]
+  end
+  
+  B --> D
+  C --> D
+  L --> D
+  P --> D
+
+
+
+    
 ```
