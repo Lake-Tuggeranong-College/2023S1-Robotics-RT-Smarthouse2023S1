@@ -26,12 +26,12 @@ DateTime rightNow;  // used to store the current time.
 
 // Traffic Lights - LED Outputs
 #define LED_RED A0
-#define LED_YELLOW A1 
+#define LED_YELLOW A1
 #define LED_GREEN A2
 
 const int DC_MOTOR_PIN_1 = 6;        // Replace with your motor pin 1
 const int DC_MOTOR_PIN_2 = 7;        // Replace with your motor pin 2
-const int MOTOR_SPEED = 255; 
+const int MOTOR_SPEED = 255;
 int crashState = 0;
 bool isLocked = false;
 
@@ -71,7 +71,7 @@ void setup() {
   pinMode(CRASH_SENSOR_PIN, INPUT);
 
   // Piezo Buzzer
-  pinMode(PIEZO_PIN ,OUTPUT);
+  pinMode(PIEZO_PIN , OUTPUT);
 
   // Traffic Lights - LED Outputs
   pinMode(LED_RED, OUTPUT);
@@ -89,7 +89,12 @@ void setup() {
 
 void loop() {
 
+  // Read crash sensor
   crashState = digitalRead(CRASH_SENSOR_PIN);
+  // Read PIR sensor
+  isPIRSensorTriggered = digitalRead(pirSensorPin);
+
+
 
   // If crash is detected, toggle the lock state
   if (crashState == HIGH) {
@@ -98,8 +103,32 @@ void loop() {
     } else {
       unlockHouse();  // Unlock the house
     }
-    delay(200);  // Debounce delay (adjust as needed)
+    delay(200);  // Debounce delay
   }
+
+
+  
+  // Check for a parcel at the door
+  bool isParcelPresent = isParcelAtDoor();
+
+  if (isParcelPresent) {
+    // Turn on the LED
+    digitalWrite(LED_YELLOW, HIGH);
+    Serial.println("Parcel detected at the door!");
+  } else {
+    // Turn off the LED
+    digitalWrite(LED_YELLOW, LOW);
+  }
+
+  // Delay for a short period
+  delay(100);
+
+
+
+   if (isPIRSensorTriggered && !isAlertSystemActivated) {
+    activateAlertSystem();
+  }
+  
 }
 
 
@@ -119,23 +148,30 @@ void controlLights() {
   analogWrite(LED_RED, redLedValue);
 }
 
+
+
+
 // Function to lock the house
 void lockHouse() {
   digitalWrite(DC_MOTOR_PIN_1, HIGH);
   digitalWrite(DC_MOTOR_PIN_2, LOW);
-  delay(2000);  // Motor runs for 2 seconds (adjust as needed)
+  delay(2000);  // Motor runs for 2 seconds
   digitalWrite(DC_MOTOR_PIN_1, LOW);
   isLocked = true;
 }
+
+
 
 // Function to unlock the house
 void unlockHouse() {
   digitalWrite(DC_MOTOR_PIN_1, LOW);
   digitalWrite(DC_MOTOR_PIN_2, HIGH);
-  delay(2000);  // Motor runs for 2 seconds (adjust as needed)
+  delay(2000);  // Motor runs for 2 seconds
   digitalWrite(DC_MOTOR_PIN_2, LOW);
   isLocked = false;
 }
+
+
 
 void activateAlertSystem() {
   // Activate LEDs
@@ -151,12 +187,14 @@ void activateAlertSystem() {
   Serial.println("Alert system activated!");
 }
 
+
+
 void resetSecuritySystem() {
   // Deactivate LEDs
-  digitalWrite(ledPin, LOW);
+  digitalWrite(LED_RED, LOW);
 
   // Deactivate buzzers
-  digitalWrite(buzzerPin, LOW);
+  digitalWrite(PIEZO_PIN, LOW);
 
   // Update state
   isAlertSystemActivated = false;
@@ -164,4 +202,11 @@ void resetSecuritySystem() {
 
   // Optional: Print message
   Serial.println("Security system reset!");
+}
+
+
+// Function to check for a parcel at the door
+bool isParcelAtDoor() {
+  lineSensorValue = digitalRead(LINE_SENSOR_PIN);
+  return lineSensorValue == LOW;
 }
