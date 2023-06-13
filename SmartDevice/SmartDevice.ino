@@ -7,6 +7,11 @@
 RTC_Millis rtc;     // Software Real Time Clock (RTC)
 DateTime rightNow;  // used to store the current time.
 
+// Servo
+#include <Servo.h>
+Servo myservo;
+
+Servo securityServo;              // Servo object
 
 //PIN ASSIGNMENTS
 // SD Card - Confirm Pin
@@ -29,8 +34,12 @@ DateTime rightNow;  // used to store the current time.
 #define LED_YELLOW A1
 #define LED_GREEN A2
 
-const int DC_MOTOR_PIN_1 = 6;        // Replace with your motor pin 1
-const int DC_MOTOR_PIN_2 = 7;        // Replace with your motor pin 2
+// Sonar - HC-SR04
+#define ECHO_PIN 6 // attach pin D2 Arduino to pin Echo of HC-SR04
+#define TRIG_PIN A4 //attach pin D3 Arduino to pin Trig of HC-SR04
+
+const int DC_MOTOR_PIN_1 = 6;
+const int DC_MOTOR_PIN_2 = 7;
 const int MOTOR_SPEED = 255;
 int crashState = 0;
 bool isLocked = false;
@@ -82,7 +91,9 @@ void setup() {
   pinMode(DC_MOTOR_PIN_1, OUTPUT);
   pinMode(DC_MOTOR_PIN_2, OUTPUT);
 
-
+  // Sonar - HC-SR04
+  pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
+  pinMode(echoPin, INPUT); // Sets the echoPin as an INPUT
 
 
 }
@@ -120,15 +131,17 @@ void loop() {
     digitalWrite(LED_YELLOW, LOW);
   }
 
+
+  if (isPIRSensorTriggered && !isAlertSystemActivated) {
+    activateAlertSystem();
+  }
+
+  // Control the security camera servo
+  controlSecurityCamera();
+
   // Delay for a short period
   delay(100);
 
-
-
-   if (isPIRSensorTriggered && !isAlertSystemActivated) {
-    activateAlertSystem();
-  }
-  
 }
 
 
@@ -202,6 +215,23 @@ void resetSecuritySystem() {
 
   // Optional: Print message
   Serial.println("Security system reset!");
+}
+
+// Function to control the security camera servo
+void controlSecurityCamera() {
+  // Read the distance from the sonar sensor
+  long duration, distance;
+  digitalWrite(sonarTriggerPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(sonarTriggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(sonarTriggerPin, LOW);
+  duration = pulseIn(sonarEchoPin, HIGH); // Measure the duration of the echo pulse
+  distance = (duration / 2) / 29.1; // converts ultrasonic to distance in cm: 29.1 is approx. speed of sound in air per cm at room temp, dividing by 2 gets the 1 way travel time.
+
+  // Adjust the position of the servo based on the distance
+  int angle = map(distance, 0, 200, 0, 180);
+  securityServo.write(angle);
 }
 
 
