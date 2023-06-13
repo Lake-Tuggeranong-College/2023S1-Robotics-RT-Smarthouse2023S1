@@ -92,8 +92,8 @@ void setup() {
   pinMode(DC_MOTOR_PIN_2, OUTPUT);
 
   // Sonar - HC-SR04
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an OUTPUT
-  pinMode(echoPin, INPUT); // Sets the echoPin as an INPUT
+  pinMode(TRIG_PIN, OUTPUT); // Sets the trigPin as an OUTPUT
+  pinMode(ECHO_PIN, INPUT); // Sets the echoPin as an INPUT
 
 
 }
@@ -103,7 +103,7 @@ void loop() {
   // Read crash sensor
   crashState = digitalRead(CRASH_SENSOR_PIN);
   // Read PIR sensor
-  isPIRSensorTriggered = digitalRead(pirSensorPin);
+  isPIRSensorTriggered = digitalRead(PIR_SENSOR_PIN);
 
 
 
@@ -139,6 +139,8 @@ void loop() {
   // Control the security camera servo
   controlSecurityCamera();
 
+  controlLights();
+  
   // Delay for a short period
   delay(100);
 
@@ -221,12 +223,12 @@ void resetSecuritySystem() {
 void controlSecurityCamera() {
   // Read the distance from the sonar sensor
   long duration, distance;
-  digitalWrite(sonarTriggerPin, LOW);
+  digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
-  digitalWrite(sonarTriggerPin, HIGH);
+  digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
-  digitalWrite(sonarTriggerPin, LOW);
-  duration = pulseIn(sonarEchoPin, HIGH); // Measure the duration of the echo pulse
+  digitalWrite(TRIG_PIN, LOW);
+  duration = pulseIn(ECHO_PIN, HIGH); // Measure the duration of the echo pulse
   distance = (duration / 2) / 29.1; // converts ultrasonic to distance in cm: 29.1 is approx. speed of sound in air per cm at room temp, dividing by 2 gets the 1 way travel time.
 
   // Adjust the position of the servo based on the distance
