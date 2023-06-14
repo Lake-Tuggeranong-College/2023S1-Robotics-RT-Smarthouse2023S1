@@ -147,6 +147,9 @@ void loop() {
   // Control the security camera servo
   controlSecurityCamera();
 
+  // Activates lighting control
+  controlLights();
+
   // Delay for a short period
   delay(100);
 }
