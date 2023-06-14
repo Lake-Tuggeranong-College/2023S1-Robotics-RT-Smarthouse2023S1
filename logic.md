@@ -3,122 +3,95 @@
 ## Customizable lighting
 
 ```mermaid
-flowchart TB
-    subgraph Arduino Code
-        A[Setup]
-        B[Loop]
-        C[Read Potentiometer]
-        D[Map Potentiometer Value]
-        E[Set LED Brightness]
-        F[Delay]
-        A --> B
-        B --> C
-        C --> D
-        D --> E
-        E --> F
-        F --> B
-    end
+flowchart TD
+    terminalStart([Start])
+    terminalEnd([End])
+    LEDValue(LEDValue = potValue / 4)
+    increaseLEDBrightness(Increase LED brightness)
+    decreaseLEDBrightness(Decrease LED brightness)
+    sameLEDBrightness(Keep same brightness)
 
-    subgraph Hardware
-        G[Potentiometer]
-        H[LED]
-        G --> C
-        H --> E
-    end
+    ifPotValue++{potValue++}
+
+    ifFalse{potValue--}
+
+
+    terminalStart --> LEDValue
+    LEDValue --> ifPotValue++
+    ifPotValue++ --> |True| increaseLEDBrightness
+    ifPotValue++ --> |False| ifFalse
+    ifFalse --> |True| decreaseLEDBrightness
+    ifFalse --> |False| sameLEDBrightness
+    sameLEDBrightness --> terminalEnd
+    decreaseLEDBrightness --> terminalEnd
+    increaseLEDBrightness --> terminalEnd
 ```
-
-## Security system
+## Parcel detector
 
 ```mermaid
-flowchart TB
-    subgraph Arduino Code
-        A[Setup]
-        B[Loop]
-        C[Read Crash Sensor]
-        D[Read Line Sensor]
-        E[Read PIR Sensor]
-        F[Check Crash Sensor]
-        G[Check Line Sensor]
-        H[Check PIR Sensor]
-        I[House Lockdown]
-        J[Activate LEDs and Buzzers]
-        K[Deactivate LEDs and Buzzers]
-        L[Reset Security System]
-        A --> B
-        B --> C
-        B --> D
-        B --> E
-        C --> F
-        D --> G
-        E --> H
-        F --> I
-        G --> J
-        H --> J
-        J --> K
-        K --> L
-        L --> B
-    end
-
-    subgraph Hardware
-        M[Crash Sensor]
-        N[Line Sensor]
-        O[PIR Sensor]
-        P[Motor]
-        Q[LEDs]
-        R[Buzzers]
-        M --> C
-        N --> D
-        O --> E
-        F --> M
-        G --> N
-        H --> O
-        I --> P
-        J --> Q
-        J --> R
-        K --> Q
-        K --> R
-    end
-
+  flowchart TD
+    terminalStart([Start])
+    terminalEnd([End])
+    lineSensorValue(lineSensorValue = HIGH)
+    LEDValue(LEDValue = LOW)
+    LEDTurnOn(LED turn on)
+    LEDTurnOff(LED turn off)
     
+    ifLineSensorValueIsLow{lineSensorValue == LOW}
+
+
+    terminalStart --> lineSensorValue
+    lineSensorValue --> LEDValue
+    LEDValue --> ifLineSensorValueIsLow
+    ifLineSensorValueIsLow --> |True| LEDTurnOn
+    ifLineSensorValueIsLow --> |False| LEDTurnOff
+    LEDTurnOff --> terminalEnd
+    LEDTurnOn --> terminalEnd
+
+
+
 ```
 
-## Security system
+## House Lockdown
 
 ```mermaid
-graph TD;
-  subgraph Initialization
-    A[Setup] --> B[Set crash sensor pin as input]
-    A --> C[Set motor pins as output]
-  end
+  flowchart TD
+    terminalStart([Start])
+    terminalEnd([End])
+    crashSensorState(crashSensorState = HIGH)
+    lockHouse(turnMotorClockwise/lockHouse)
+    unlockHouse(turnMotorAnticlockwise/unlockHouse)
 
-  subgraph Main Loop
-    D[Read crash sensor state] --> E[Is crash detected?]
-    E -- No --> D
-    E -- Yes --> F[Is house locked?]
-    F -- No --> G[Lock the house]
-    F -- Yes --> H[Unlock the house]
-  end
+    ifCrashSensorState{ifCrashSensorState == LOW && houseIsNotLocked}
 
-  subgraph Lock House
-    G --> I[Activate motor clockwise]
-    I --> J[Delay 2 seconds]
-    J --> K[Stop motor]
-    K --> L[Set house as locked]
-  end
+    ifCrashSensorState2{ifCrashSensorState == LOW && houseIsLocked}
 
-  subgraph Unlock House
-    H --> M[Activate motor counter-clockwise]
-    M --> N[Delay 2 seconds]
-    N --> O[Stop motor]
-    O --> P[Set house as unlocked]
-  end
-  
-  B --> D
-  C --> D
-  L --> D
-  P --> D
+    terminalStart --> crashSensorState
+    crashSensorState --> ifCrashSensorState
+    ifCrashSensorState --> |True| lockHouse
+    ifCrashSensorState --> |False| ifCrashSensorState2
+    ifCrashSensorState2 --> |True| unlockHouse
+    ifCrashSensorState2 --> |False| terminalEnd
+    unlockHouse --> terminalEnd
+    lockHouse --> terminalEnd
 
 
+```
+## Motion Sensor Alert
 
-    
+```mermaid
+  flowchart TD
+    terminalStart([Start])
+    terminalEnd([End])
+    LEDRed(LEDRed = LOW)
+    PIRIsActive(activateAlert)
+
+    isMotionDetected{ifMotionIsDetected && alertSystemIsNotActive}
+
+
+    terminalStart --> LEDRed
+    LEDRed --> isMotionDetected
+    isMotionDetected --> |True| PIRIsActive
+    isMotionDetected --> |False| terminalEnd
+    PIRIsActive --> terminalEnd
 ```
