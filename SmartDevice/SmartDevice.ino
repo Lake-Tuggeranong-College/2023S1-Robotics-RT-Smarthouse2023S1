@@ -9,11 +9,10 @@ DateTime rightNow;  // used to store the current time.
 
 // Servo
 #include <Servo.h>
-Servo myservo;
 
-Servo securityServo;              // Servo object
+Servo securityServo; // Servo object
 
-//PIN ASSIGNMENTS
+// PIN ASSIGNMENTS
 // SD Card - Confirm Pin
 #define SD_PIN 10
 
@@ -35,19 +34,32 @@ Servo securityServo;              // Servo object
 #define LED_GREEN A2
 
 // Sonar - HC-SR04
-#define ECHO_PIN 6 // attach pin D2 Arduino to pin Echo of HC-SR04
-#define TRIG_PIN A4 //attach pin D3 Arduino to pin Trig of HC-SR04
+#define ECHO_PIN 6 
+#define TRIG_PIN A4
 
+// PIR sensor
+#define PIR_SENSOR_PIN 4
+
+// variables for house lockdown proccess
 const int DC_MOTOR_PIN_1 = 6;
 const int DC_MOTOR_PIN_2 = 7;
 const int MOTOR_SPEED = 255;
 int crashState = 0;
 bool isLocked = false;
 
-
+// variables for lighting control
 int potValue = 0;
-int ledValue = 0;
+int greenLedValue = 0;
+int yellowLedValue = 0;
+int redLedValue = 0;
 
+// variables for the alert system
+bool isPIRSensorTriggered = false;
+bool isAlertSystemActivated = false;
+bool isHouseLockedDown = false;
+
+// variables for package detection
+int lineSensorValue = 0;
 
 
 void setup() {
@@ -92,9 +104,8 @@ void setup() {
   pinMode(DC_MOTOR_PIN_2, OUTPUT);
 
   // Sonar - HC-SR04
-  pinMode(TRIG_PIN, OUTPUT); // Sets the trigPin as an OUTPUT
-  pinMode(ECHO_PIN, INPUT); // Sets the echoPin as an INPUT
-
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT); 
 
 }
 
@@ -107,21 +118,18 @@ void loop() {
 
 
 
-  // If crash is detected, toggle the lock state
-  if (crashState == HIGH) {
+  // If crash detector is activated, toggle the house lockdown state by using lockHouse() and unlockHouse() functions
+  if (crashState == LOW) {
     if (!isLocked) {
       lockHouse();  // Lock the house
     } else {
       unlockHouse();  // Unlock the house
     }
-    delay(200);  // Debounce delay
   }
 
 
-  
-  // Check for a parcel at the door
+  // Check for a parcel at the door by using value from isParcelAtDoor() function
   bool isParcelPresent = isParcelAtDoor();
-
   if (isParcelPresent) {
     // Turn on the LED
     digitalWrite(LED_YELLOW, HIGH);
@@ -131,7 +139,7 @@ void loop() {
     digitalWrite(LED_YELLOW, LOW);
   }
 
-
+  // uses the activateAlertSystem() fuction if PIR sensor is triggered and the alert system is not already activated
   if (isPIRSensorTriggered && !isAlertSystemActivated) {
     activateAlertSystem();
   }
@@ -139,16 +147,20 @@ void loop() {
   // Control the security camera servo
   controlSecurityCamera();
 
-  controlLights();
-  
   // Delay for a short period
   delay(100);
-
 }
 
 
-// Function to control lights
+
 void controlLights() {
+  /*
+     Controls the brightness of LED's using the potentiometer
+     to adjust the values.
+     Didnt work fully as intended
+     @param: none
+     @return: void
+  */
   // Read potentiometer value
   potValue = analogRead(POTENTIOMETER_PIN);
 
@@ -166,8 +178,13 @@ void controlLights() {
 
 
 
-// Function to lock the house
 void lockHouse() {
+  /*
+     Activates dc motor to spin for 2 seconds and then stop.
+     Worked as intended
+     @param: none
+     @return: void
+  */
   digitalWrite(DC_MOTOR_PIN_1, HIGH);
   digitalWrite(DC_MOTOR_PIN_2, LOW);
   delay(2000);  // Motor runs for 2 seconds
@@ -177,8 +194,14 @@ void lockHouse() {
 
 
 
-// Function to unlock the house
 void unlockHouse() {
+  /*
+     Activates dc motor to spin in opposite direction for 2
+     seconds then stop.
+     Worked as intended
+     @param: none
+     @return: void
+  */
   digitalWrite(DC_MOTOR_PIN_1, LOW);
   digitalWrite(DC_MOTOR_PIN_2, HIGH);
   delay(2000);  // Motor runs for 2 seconds
@@ -189,6 +212,13 @@ void unlockHouse() {
 
 
 void activateAlertSystem() {
+  /*
+     Activates the red LED and the piezo
+     Worked as intended
+     @param: none
+     @return: void
+  */
+  
   // Activate LEDs
   digitalWrite(LED_RED, HIGH);
 
@@ -203,24 +233,15 @@ void activateAlertSystem() {
 }
 
 
-
-void resetSecuritySystem() {
-  // Deactivate LEDs
-  digitalWrite(LED_RED, LOW);
-
-  // Deactivate buzzers
-  digitalWrite(PIEZO_PIN, LOW);
-
-  // Update state
-  isAlertSystemActivated = false;
-  isHouseLockedDown = false;
-
-  // Optional: Print message
-  Serial.println("Security system reset!");
-}
-
-// Function to control the security camera servo
 void controlSecurityCamera() {
+  /*
+     Controls servo angle based off of the distance that the
+     sonar detects an object from itself
+     Didnt work as intended
+     @param: none
+     @return: void
+  */
+  
   // Read the distance from the sonar sensor
   long duration, distance;
   digitalWrite(TRIG_PIN, LOW);
@@ -229,7 +250,7 @@ void controlSecurityCamera() {
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
   duration = pulseIn(ECHO_PIN, HIGH); // Measure the duration of the echo pulse
-  distance = (duration / 2) / 29.1; // converts ultrasonic to distance in cm: 29.1 is approx. speed of sound in air per cm at room temp, dividing by 2 gets the 1 way travel time.
+  distance = (duration / 2) / 29; // converts ultrasonic to distance in cm: 29 is approx. speed of sound in air per cm at room temp, dividing by 2 gets the 1 way travel time.
 
   // Adjust the position of the servo based on the distance
   int angle = map(distance, 0, 200, 0, 180);
@@ -237,8 +258,14 @@ void controlSecurityCamera() {
 }
 
 
-// Function to check for a parcel at the door
 bool isParcelAtDoor() {
+  /*
+     Detects whether there is anything activating the line
+     sensor and returns the value "LOW" if there is.
+     Worked succesfully
+     @param: none
+     @return: lineSensorValue
+  */
   lineSensorValue = digitalRead(LINE_SENSOR_PIN);
   return lineSensorValue == LOW;
 }
