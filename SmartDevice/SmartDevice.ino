@@ -157,7 +157,6 @@ void controlLights() {
   /*
      Controls the brightness of LED's using the potentiometer
      to adjust the values.
-     Didnt work fully as intended
      @param: none
      @return: void
   */
@@ -181,7 +180,6 @@ void controlLights() {
 void lockHouse() {
   /*
      Activates dc motor to spin for 2 seconds and then stop.
-     Worked as intended
      @param: none
      @return: void
   */
@@ -189,6 +187,7 @@ void lockHouse() {
   digitalWrite(DC_MOTOR_PIN_2, LOW);
   delay(2000);  // Motor runs for 2 seconds
   digitalWrite(DC_MOTOR_PIN_1, LOW);
+  logEvent("House locked");
   isLocked = true;
 }
 
@@ -198,7 +197,6 @@ void unlockHouse() {
   /*
      Activates dc motor to spin in opposite direction for 2
      seconds then stop.
-     Worked as intended
      @param: none
      @return: void
   */
@@ -206,6 +204,7 @@ void unlockHouse() {
   digitalWrite(DC_MOTOR_PIN_2, HIGH);
   delay(2000);  // Motor runs for 2 seconds
   digitalWrite(DC_MOTOR_PIN_2, LOW);
+  logEvent("House unlocked");
   isLocked = false;
 }
 
@@ -214,7 +213,6 @@ void unlockHouse() {
 void activateAlertSystem() {
   /*
      Activates the red LED and the piezo
-     Worked as intended
      @param: none
      @return: void
   */
@@ -230,6 +228,7 @@ void activateAlertSystem() {
 
   // Print message
   Serial.println("Alert system activated!");
+  logEvent("Alert system activated");
 }
 
 
@@ -237,7 +236,6 @@ void controlSecurityCamera() {
   /*
      Controls servo angle based off of the distance that the
      sonar detects an object from itself
-     Didnt work as intended
      @param: none
      @return: void
   */
@@ -262,10 +260,10 @@ bool isParcelAtDoor() {
   /*
      Detects whether there is anything activating the line
      sensor and returns the value "LOW" if there is.
-     Worked succesfully
      @param: none
      @return: lineSensorValue
   */
   lineSensorValue = digitalRead(LINE_SENSOR_PIN);
   return lineSensorValue == LOW;
+  logEvent("Parcel detected");
 }
